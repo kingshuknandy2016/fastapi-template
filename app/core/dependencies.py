@@ -1,14 +1,16 @@
+from fastapi import Depends
+from sqlalchemy.orm import Session
+
+from app.db.session import get_db
 from app.repositories.user_repository import UserRepository
 from app.services.user_service import UserService
 
 
-class ServiceContainer:
-    user_service: UserService | None = None
+def get_user_repository(db: Session = Depends(get_db)) -> UserRepository:
+    return UserRepository(db)
 
 
-container = ServiceContainer()
-
-
-def init_services():
-    user_repo = UserRepository()
-    container.user_service = UserService(user_repo)
+def get_user_service(
+    user_repository: UserRepository = Depends(get_user_repository),
+) -> UserService:
+    return UserService(user_repository)
